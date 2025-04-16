@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MazeServiceTest {
 
-    private final MazeService mazeService = new MazeService();
+    private final MazeService mazeService = new MazeServiceImpl();
 
     @Test
     void testGenerateMazeSizeAndStartEnd() {
