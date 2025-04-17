@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 
@@ -22,14 +24,16 @@ class MazeControllerTest {
     @Test
     void getMazeTest() {
 
-        String response = restTemplate.getForObject(getBaseUrl() + "/generate", String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(getBaseUrl() + "/generate", String.class);
         assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
     void solveMazeTest() {
-        String response = restTemplate.postForObject(getBaseUrl() + "/solve", new ArrayList<>(), String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(getBaseUrl() + "/solve", new ArrayList<>(), String.class);
         assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     private String getBaseUrl() {
