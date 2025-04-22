@@ -1,5 +1,8 @@
 package com.example.lostingrid.service;
 
+import com.example.lostingrid.entity.CellType;
+import com.example.lostingrid.entity.MazeAlgorithm;
+import com.example.lostingrid.entity.MazeResponse;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,19 +15,16 @@ class MazeServiceTest {
 
     @Test
     void testGenerateMazeSizeAndStartEnd() {
-        int rows = 10;
+        int rows = 11;
         int cols = 15;
 
-        List<List<Integer>> maze = mazeService.generateMaze(rows, cols);
+        MazeResponse maze = mazeService.generateMaze(rows, cols, MazeAlgorithm.DFS);
 
-        assertEquals(rows, maze.size(), "Maze should have correct number of rows");
+        assertEquals(rows, maze.getGrid().getRows(), "Maze should have correct number of rows");
+        assertEquals(cols, maze.getGrid().getCols(), "Maze should have correct number of cols");
 
-        for (List<Integer> row : maze) {
-            assertEquals(cols, row.size(), "Each row should have correct number of columns");
-        }
-
-        assertEquals(0, maze.getFirst().getFirst(), "Start cell (0,0) should be a passage (0)");
-        assertEquals(0, maze.get(rows - 1).get(cols - 1), "End cell should be a passage (0)");
+        assertEquals(CellType.PATH, maze.getGrid().getCells()[1][1], "Start cell (1,1) should be a passage");
+        assertEquals(CellType.PATH, maze.getGrid().getCells()[rows - 2][cols - 2], "End cell should be a passage");
     }
 
     @Test

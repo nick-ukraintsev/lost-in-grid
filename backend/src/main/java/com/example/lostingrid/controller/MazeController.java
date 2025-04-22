@@ -1,5 +1,7 @@
 package com.example.lostingrid.controller;
 
+import com.example.lostingrid.entity.MazeAlgorithm;
+import com.example.lostingrid.entity.MazeResponse;
 import com.example.lostingrid.service.MazeService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +18,12 @@ public class MazeController {
     }
 
     @GetMapping("/generate")
-    public List<List<Integer>> generateMaze(
+    public MazeResponse generateMaze(
             @RequestParam(defaultValue = "10") int rows,
-            @RequestParam(defaultValue = "10") int cols
+            @RequestParam(defaultValue = "10") int cols,
+            @RequestParam(defaultValue = "DFS") MazeAlgorithm algorithmType
     ) {
-        return mazeService.generateMaze(rows, cols);
+        return mazeService.generateMaze(rows, cols, algorithmType);
     }
 
     @PostMapping("/solve")

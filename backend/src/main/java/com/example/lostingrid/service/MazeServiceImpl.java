@@ -1,33 +1,68 @@
 package com.example.lostingrid.service;
 
+import com.example.lostingrid.entity.Cell;
+import com.example.lostingrid.entity.CellType;
+import com.example.lostingrid.entity.Grid;
+import com.example.lostingrid.entity.MazeAlgorithm;
+import com.example.lostingrid.entity.MazeResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 @Service
 public class MazeServiceImpl implements MazeService {
 
-    private final Random random = new Random();
+    private final int[][] directions = {{-2, 0}, {2, 0}, {0, -2}, {0, 2}};
 
-    @Override
-    public List<List<Integer>> generateMaze(int rows, int cols) {
-        List<List<Integer>> maze = new ArrayList<>();
+    public MazeResponse generateMaze(int rows, int cols, MazeAlgorithm algorithmType) {
+        if (rows % 2 == 0) rows++;
+        if (cols % 2 == 0) cols++;
 
-        for (int i = 0; i < rows; i++) {
-            List<Integer> row = new ArrayList<>();
-            for (int j = 0; j < cols; j++) {
-                // 0 — прохід, 1 — стіна
-                int cell = (i == 0 && j == 0) || (i == rows - 1 && j == cols - 1)
-                        ? 0 // старт і фініш завжди прохід
-                        : random.nextInt(100) < 30 ? 0 : 1; // 70% ймовірність проходу
-                row.add(cell);
+        Grid grid = new Grid(rows, cols);
+        List<Cell> steps = new ArrayList<>();
+
+        // Спочатку все - стіни
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                grid.setCell(r, c, CellType.WALL);
             }
-            maze.add(row);
         }
 
-        return maze;
+        Random random = new Random();
+        dfs(1, 1, grid, steps, random);
+
+        return new MazeResponse(grid, steps);
+    }
+
+    private void dfs(int r, int c, Grid grid, List<Cell> steps, Random rand) {
+        grid.setCell(r, c, CellType.PATH);
+        steps.add(new Cell(r, c, CellType.PATH));
+
+        List<int[]> dirs = new ArrayList<>(Arrays.asList(directions));
+        Collections.shuffle(dirs, rand);
+
+        for (int[] dir : dirs) {
+            int nr = r + dir[0];
+            int nc = c + dir[1];
+
+            if (isInBounds(nr, nc, grid) && grid.getCells()[nr][nc] == CellType.WALL) {
+                int wallR = r + dir[0] / 2;
+                int wallC = c + dir[1] / 2;
+
+                grid.setCell(wallR, wallC, CellType.PATH);
+                steps.add(new Cell(wallR, wallC, CellType.PATH));
+
+                dfs(nr, nc, grid, steps, rand);
+            }
+        }
+    }
+
+    private boolean isInBounds(int r, int c, Grid grid) {
+        return r > 0 && r < grid.getRows() && c > 0 && c < grid.getCols();
     }
 
     @Override

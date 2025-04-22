@@ -1,30 +1,44 @@
 async function generateMaze() {
-    const rows = 20;
-    const cols = 20;
-    const response = await fetch(`/api/maze/generate?rows=${rows}&cols=${cols}`);
-    const maze = await response.json();
-    drawMaze(maze);
-}
+    const response = await fetch('/api/maze/generate?rows=21&cols=21');
+    const data = await response.json();
+    const grid = data.grid;
+    const steps = data.steps;
 
-function drawMaze(maze) {
-    const canvas = document.getElementById('mazeCanvas');
-    const ctx = canvas.getContext('2d');
-    const rows = maze.length;
-    const cols = maze[0].length;
+    const mazeDiv = document.getElementById('maze');
+    mazeDiv.innerHTML = '';
+    mazeDiv.style.gridTemplateColumns = `repeat(${grid.cols}, 20px)`;
 
-    const cellWidth = canvas.width / cols;
-    const cellHeight = canvas.height / rows;
+    const cellDivs = [];
 
-    for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-            ctx.fillStyle = maze[y][x] === 1 ? '#222' : '#fff';
-            ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+    // Побудова порожньої сітки (все — стіни)
+    for (let r = 0; r < grid.rows; r++) {
+        cellDivs[r] = [];
+        for (let c = 0; c < grid.cols; c++) {
+            const cellDiv = document.createElement('div');
+            cellDiv.classList.add('cell', 'wall'); // Все починається як стіна
+            mazeDiv.appendChild(cellDiv);
+            cellDivs[r][c] = cellDiv;
         }
     }
 
-    ctx.fillStyle = 'green';
-    ctx.fillRect(0, 0, cellWidth, cellHeight);
+    // Поступове відкривання проходів
+    let i = 0;
+    const interval = setInterval(() => {
+        if (i >= steps.length) {
+            clearInterval(interval);
+            return;
+        }
 
-    ctx.fillStyle = 'red';
-    ctx.fillRect((cols - 1) * cellWidth, (rows - 1) * cellHeight, cellWidth, cellHeight);
+        const step = steps[i];
+        const div = cellDivs[step.row][step.col];
+        div.classList.remove('wall');
+        div.classList.add('path', 'step'); // додаємо ефект "малювання"
+
+        // ефект жовтого підсвічування
+        setTimeout(() => {
+            div.classList.remove('step');
+        }, 100);
+
+        i++;
+    }, 20); // швидкість анімації
 }
